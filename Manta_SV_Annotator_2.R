@@ -1,11 +1,3 @@
-# Example usage
-# Rscript /.../Manta_SV_Annotation/Manta_SV_Annotator_2.R 
-# -i "/.../Manta_Bedpe_SVtools/Filtered/CDS-0b4jFH.somaticSV_filtered.bedpe" 
-# -r "/.../Manta_SV_Annotation/inputfiles/gencode_hg38_annotations_table.txt" 
-# -c "/.../Manta_SV_Annotation/inputfiles/Census_cancer_genes_allTue_May_2018.tsv" 
-# -t "/.../Manta_SV_Annotation/inputfiles/imr90fibroblast_tad_boundaries.txt"
-
-
 #### import libraries and packages
 cat("Loading packages...\n")
 suppressPackageStartupMessages(require(data.table))
@@ -26,8 +18,6 @@ cat("...done.\n")
 #' @description Determines if each breakend of a SV occurs within a gene's boundaries
 #' @export
 #'
-
-
 annotate_sv = function(i, bedpe_inp) {
   
   ### build granges for reference
