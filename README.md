@@ -1,4 +1,4 @@
-# VCF_to Bedpe Function
+# MANTA_vcf2bedpe Function
 
 The vcf to bedpe workflow is desgined to prepare the Manta calls for SV annotation. During the preperation a few predetermined filtering steps are applied.
 	1. Manta calls that are less than 1kb are removed. The removed calls are mostly indels and potential germline calls. 
@@ -7,6 +7,8 @@ The vcf to bedpe workflow is desgined to prepare the Manta calls for SV annotati
 
 These Manta calls are written out in the same output directory in a minimally processed file for further investigation if desired. This file is labeled as the sample name with '.removed_calls' ending
 
+This code is an R implementation of the svtools vcf2bedpe function which can also be used.
+
 ## Example Usage
 ```bash
 Rscript MANTA_vcf2bedpe.R -i <path to vcf file> -o <output directory path>
@@ -14,7 +16,8 @@ Rscript MANTA_vcf2bedpe.R -i <path to vcf file> -o <output directory path>
 
 
 # MantaSVAnnotator
-Takes Manta VCFs or BEDPE file formats and annotates the structural variants
+Takes Manta bedpe from either the MANTA_vcf2bedpe function or from the svtools. Annotates each breakpoint to determine if it is in a gencode identified region. 
+This function also outputs genes that are present in the TAD the SV occurs in.
 
 use `Manta_SV_Annotator_2`
 
