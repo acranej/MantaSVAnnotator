@@ -1,8 +1,11 @@
-# MANTA_vcf2bedpe Function
+# MANTA_vcf2bedpe
 
 The vcf to bedpe workflow is desgined to prepare the Manta calls for SV annotation. During the preperation a few predetermined filtering steps are applied.
+	
 	1. Manta calls that are less than 1kb are removed. The removed calls are mostly indels and potential germline calls. 
+	
 	2. Manta calls labeled as 'IMPRECISE' by Manta are removed. These lack additional metadata such as homology that impact downstream analysis. These calls are also ones that may lack a precise breakpoint location.
+	
 	3. Manta calls that align to any chromosome other than 1-22 and X are removed. 
 
 These Manta calls are written out in the same output directory in a minimally processed file for further investigation if desired. This file is labeled as the sample name with '.removed_calls' ending
