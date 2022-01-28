@@ -1,4 +1,4 @@
-#VCF_to Bedpe Function
+# VCF_to Bedpe Function
 
 The vcf to bedpe workflow is desgined to prepare the Manta calls for SV annotation. During the preperation a few predetermined filtering steps are applied.
 	1. Manta calls that are less than 1kb are removed. The removed calls are mostly indels and potential germline calls. 
