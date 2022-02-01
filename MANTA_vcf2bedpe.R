@@ -176,7 +176,7 @@ option_list <- list(
   
   make_option(c("-i", "--input"),  type = "character", default = NULL,  help = "Input vcf path"),
   
-  make_option(c("-o", "output"), type = "character", default = NULL, help = "Output directory")
+  make_option(c("-o", "--output"), type = "character", default = NULL, help = "Output directory")
   
 )
 
