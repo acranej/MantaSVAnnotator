@@ -3,10 +3,13 @@ suppressPackageStartupMessages(require(data.table))
 ###################################
 # Functions to convert vcf to bedpe 
 ###################################
+
+# Function description ?????
 bnd_matching <- function(id) {
   which_mate_A <- bnd_[grepl(id, ID)]
   which_mate_B <- bnd_[which_mate_A$ID == MATE_ID]
   
+  # ???
   if(nrow(which_mate_A) == 1 && nrow(which_mate_B) == 1) {
       bed_temp <- as.data.table(cbind(which_mate_A$seqnames, which_mate_A$start, which_mate_A$start + which_mate_A$HOMLEN, 
                                       which_mate_B$seqnames, which_mate_B$start, which_mate_B$start + which_mate_B$HOMLEN))
@@ -25,13 +28,14 @@ bnd_matching <- function(id) {
       strB <- strsplit(which_mate_B$ALT, "")
       str_m <- grep("[[]",strB)
       str_p <- grep("[]]", strB)
-      
+      # ????
       strandA <- ifelse((length(str_m) > 0), "-", ifelse((length(str_p) > 0), "+", "*"))
       
       bed_temp <- cbind(bed_temp, which_mate_A$ID, which_mate_A$QUAL, strandA,strandB, which_mate_A$TYPE,
                         which_mate_A$FILTER, which_mate_A$ID, which_mate_A$REF, 
                         which_mate_A$ALT, which_mate_B$ID, which_mate_B$REF, which_mate_B$ALT,
-                        which_mate_A$INFO, which_mate_B$INFO, which_mate_A$FORMAT, which_mate_A$OCILY12, which_mate_A$SPAN) #### need to use the alt seq to adjust start positons of these (nchar(gsub[A-Z]))
+                        #### need to use the alt seq to adjust start positons of these (nchar(gsub[A-Z]))
+                        which_mate_A$INFO, which_mate_B$INFO, which_mate_A$FORMAT, which_mate_A$OCILY12, which_mate_A$SPAN)
       
       colnames(bed_temp)[7:23] <- c("ID", "QUAL", "STRAND_A","STRAND_B","TYPE",
                                     "FILTER","NAME_A","REF_A", "ALT_A","NAME_B","REF_B",
@@ -42,17 +46,15 @@ bnd_matching <- function(id) {
       bed_temp[, uuid := paste0(file_name, ":",CHROM_A,
                                 ":", START_A,":", END_A,":", CHROM_B, ":", START_B,
                                 ":", END_B)]
-      
 
-      
      return(bed_temp)
   }
 }
 
 
+# ?????
 vcf_to_bedpe <- function(path) {
   cat("Converting VCF...\n")
-  
   vcf.input <- data.table::fread(cmd=paste("grep -v '^#'", path), sep='\t')
   
   if (nrow(vcf.input) == 0) {stop(sprintf('This file is empty!'))}
@@ -62,10 +64,8 @@ vcf_to_bedpe <- function(path) {
                                                  "ALT","QUAL","FILTER","INFO",
                                                  "FORMAT","OCILY12"))
   }
-  
+  # Extract info from columns...
   if ("INFO" %in% colnames(vcf.input)) {
-    # Extract info from columns...
-    
     ### SV TYPE
     vcf.input[, TYPE := gsub(".*?SVTYPE=([A-Z]+).*", "\\1", INFO)]
     
@@ -76,11 +76,9 @@ vcf_to_bedpe <- function(path) {
     vcf.input$seqnames <- gsub("chr", "",vcf.input$seqnames)
     
     ### remove those that are not over 1000 bp
-    
     vcf.input_s <- vcf.input[as.numeric(SPAN) >= 1000 | as.numeric(SPAN) == -1]
     
     ### remove imprecise calls, these do not have homology 
-    
     vcf.input_ss <- vcf.input_s[!(grepl("IMPRECISE", INFO))]
     
     ### HOMSEQ
@@ -107,7 +105,7 @@ vcf_to_bedpe <- function(path) {
     
     non_bnd[,CHROM_A := seqnames ]
     non_bnd[,CHROM_B := seqnames ]
-    
+    # ??? what happens exactly?
     non_bnd[, START_A := start]
     non_bnd[, END_A := start + HOMLEN]
     non_bnd[is.na(END_A), END_A := START_A]
@@ -143,8 +141,10 @@ vcf_to_bedpe <- function(path) {
     
     
     #### build bedpe from BND
+    # ??? what happens exactly
     bnd_ = vcf.input_com_chrom_sss[TYPE == "BND"]
     bnd_[,MATE_ID := unlist(strsplit(unlist(strsplit(INFO, "MATEID="))[2],"[;]"))[1], by = "ID"]
+    
     cat('Matching breakends...\n')
     bnd_bed <- lapply(bnd_$ID, bnd_matching)
     bnd_bed <- rbindlist(bnd_bed)
@@ -173,11 +173,8 @@ vcf_to_bedpe <- function(path) {
 }
 
 option_list <- list(
-  
   make_option(c("-i", "--input"),  type = "character", default = NULL,  help = "Input vcf path"),
-  
   make_option(c("-o", "--output"), type = "character", default = NULL, help = "Output directory")
-  
 )
 
 parseobj = OptionParser(option_list = option_list)
@@ -190,10 +187,3 @@ output_file = sprintf("%s.bedpe", file_name)
 
 out_bed <- vcf_to_bedpe(input_pth)
 write.table(out_bed, paste0(output_dir, '/',output_file), sep = '\t', row.names = F, col.names = T, quote = F)
-
-
-
-
-
-
-
