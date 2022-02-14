@@ -99,7 +99,7 @@ vcf_to_bedpe <- function(path) {
     
     ### remove those that are not over 1000 bp
     
-    vcf.input_s <- vcf.input[as.numeric(SPAN) >= 1000 | as.numeric(SPAN) == -1]
+    vcf.input_s <- vcf.input[as.numeric(SPAN) >= 50 | as.numeric(SPAN) == -1]
     
     ### remove imprecise calls, these do not have homology 
     
@@ -113,7 +113,7 @@ vcf_to_bedpe <- function(path) {
     vcf.input_ss[is.na(HOMLEN), HOMSEQ := ""]
     
     ### remove non standard seqs (chromosomes), also for alts
-    vcf.input_com_chrom <- vcf.input_ss[seqnames %in% c(1:22,"X")] 
+    vcf.input_com_chrom <- vcf.input_ss[seqnames %in% c(1:22,"X", "Y")] 
     vcf.input_com_chrom_s <- vcf.input_com_chrom[!(grepl("chrUn",ALT))]
     vcf.input_com_chrom_ss <- vcf.input_com_chrom_s[!(grepl("random",ALT))]
     vcf.input_com_chrom_sss <- vcf.input_com_chrom_ss[!(grepl("alt",ALT))]
@@ -174,7 +174,7 @@ vcf_to_bedpe <- function(path) {
     
     
     #### build bedpe from BND
-    ### translocations must be formatted separately and must have their mate ids matched since they are located oon different chroomosomes 
+    ### translocations must be formatted separately and must have their mate ids matched since they are located on different chromosomes 
     bnd_ <<- vcf.input_com_chrom_sss[TYPE == "BND"]
     bnd_[,MATE_ID := unlist(strsplit(unlist(strsplit(INFO, "MATEID="))[2],"[;]"))[1], by = "ID"]
     cat('Matching breakends...\n')
@@ -205,6 +205,8 @@ vcf_to_bedpe <- function(path) {
   }
   return(bedpe)
 }
+
+
 
 ### options list and user input parsing
 option_list <- list(
