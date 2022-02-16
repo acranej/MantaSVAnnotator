@@ -8,7 +8,7 @@ The vcf to bedpe workflow is desgined to prepare the Manta calls for SV annotati
 	
 	3. Manta calls that align to any chromosome other than 1-22, X, and Y are removed. 
 
-These Manta calls are written out in the same output directory in a minimally processed file for further investigation if desired. This file is labeled as the sample name with '.removed_calls' ending
+These Manta calls are written out in the same output directory in a minimally processed file for further investigation if desired. This file is labeled as the sample name with {%.removed_calls} ending.
 
 This code is an R implementation of the svtools vcf2bedpe function which can also be used. The filters applied differ between the two functions.
 
@@ -22,14 +22,12 @@ Rscript MANTA_vcf2bedpe.R -i <path to vcf file> -o <output directory path>
 Takes Manta bedpe from either the MANTA_vcf2bedpe function or from the svtools. Annotates each breakpoint to determine if it is in a gencode identified region. 
 This function also outputs genes that are present in the TAD the SV occurs in.
 
+Uses fuzzy filtering based on gnomad germline SVs to determine somatic events. {%.sv.annotated.bedpe} contains both germline and somatic annotated events.  {%.somatic_only_sv.annotated.bedpe} contains all SV annotations that were not within 200bp of a perfect match in the gnomad germline SV reference.
+
 use `Manta_SV_Annotator_2`
 
 ## Example usage
 
 ```bash
-Rscript /.../Manta_SV_Annotation/Manta_SV_Annotator_2.R 
--i "/.../Manta_Bedpe_SVtools/Filtered/CDS-0b4jFH.somaticSV_filtered.bedpe" 
--r "/.../Manta_SV_Annotation/inputfiles/gencode_hg38_annotations_table.txt" 
--c "/.../Manta_SV_Annotation/inputfiles/Census_cancer_genes_allTue_May_2018.tsv" 
--t "/.../Manta_SV_Annotation/inputfiles/imr90fibroblast_tad_boundaries.txt"
+Rscript Manta_SV_Annotator_2.R -i <input file path> -o <output directory path> -r <gene annotation file path> -g <germline reference file path>
 ```
