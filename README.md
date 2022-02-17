@@ -25,9 +25,15 @@ This function also outputs genes that are present in the TAD the SV occurs in.
 Uses fuzzy filtering based on gnomad germline SVs to determine somatic events. {%.sv.annotated.bedpe} contains both germline and somatic annotated events.  {%.somatic_only_sv.annotated.bedpe} contains all SV annotations that were not within 200bp of a perfect match in the gnomad germline SV reference.
 
 use `Manta_SV_Annotator_2`
+use 'hg38_ensembl_genelocations_formatted.txt' as the gene annotation file
 
 ## Example usage
 
 ```bash
 Rscript Manta_SV_Annotator_2.R -i <input file path> -o <output directory path> -r <gene annotation file path> -g <germline reference file path>
 ```
+
+## Reference files 
+Ensembl gene locations were downloaded from biomart. Formatting restricted the table to gene boundaries, chromosome, and gene ID to reduce file size. 
+
+Gnomad germline SV reference files were downloaded from the gnomad project public database (controls only). They were then restricted to those that 'PASSED' gnomad's filtering process. The rtracklayer implimentation of liftOver was used to translate the hg19 positionss to hg38. Insertions had endpoints adjusted to reflect the size of the insertion in relation to the reference genome.
