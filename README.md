@@ -42,9 +42,9 @@ Rscript Manta_SV_Annotator_2.R
 ```
 
 ## Reference files 
-Ensembl gene locations were downloaded from biomart. Formatting restricted the table to gene boundaries, chromosome, and gene ID to reduce file size. 
+Ensembl gene locations were downloaded from biomart(http://nov2020.archive.ensembl.org/biomart). Formatting restricted the table to gene boundaries, chromosome, and gene ID to reduce file size. 
 
-Gnomad germline SV reference files were downloaded from the gnomad project public database (controls only). They were then restricted to those that 'PASSED' gnomad's filtering process. The rtracklayer implimentation of liftOver was used to translate the hg19 positions to hg38. Insertions had endpoints adjusted to reflect the size of the insertion in relation to the reference genome.
+Gnomad germline SV reference files were downloaded from the gnomad project public database (https://gnomad.broadinstitute.org/downloads SV 2.1 (controls) sites BED). They were then restricted to those that 'PASSED' gnomad's filtering process. The rtracklayer implimentation of liftOver was used to translate the hg19 positions to hg38. Insertions had endpoints adjusted to reflect the size of the insertion in relation to the reference genome.
 
 ## File pipeline
 ```bash
