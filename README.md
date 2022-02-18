@@ -34,10 +34,10 @@ use `gnomad_germline_hg38all.txt` as the germline annotation file
 
 ```bash
 Rscript Manta_SV_Annotator_2.R 
--i <Required:input file path> 
--o <Required:output directory path> 
--r <Required:gene annotation file path> 
--g <Required:germline reference file path> 
+-i <Required:input input_filepath> 
+-o <Required:output directory_path/> 
+-r <Required:gene annotation_filepath> 
+-g <Required:germline reference_filepath> 
 -c <Optional:cores (default = 1)>
 ```
 
