@@ -1,20 +1,12 @@
-# Example usage
-# Rscript /.../Manta_SV_Annotation/Manta_SV_Annotator_2.R 
-# -i "/.../Manta_Bedpe_SVtools/Filtered/CDS-0b4jFH.somaticSV_filtered.bedpe" 
-# -r "/.../Manta_SV_Annotation/inputfiles/gencode_hg38_annotations_table.txt" 
-# -c "/.../Manta_SV_Annotation/inputfiles/Census_cancer_genes_allTue_May_2018.tsv" 
-# -t "/.../Manta_SV_Annotation/inputfiles/imr90fibroblast_tad_boundaries.txt"
-
-
 #### import libraries and packages
 cat("Loading packages...\n")
+time_begin <- Sys.time()
 suppressPackageStartupMessages(require(data.table))
 suppressPackageStartupMessages(require(GenomicRanges))
 suppressPackageStartupMessages(require(gUtils))
 suppressPackageStartupMessages(require(optparse))
 suppressPackageStartupMessages(library(parallel))
 Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS = TRUE)
-#source('/Volumes/xchip_beroukhimlab/Alex/Manta_SV_Annotation/inputfiles/gUtils_source.R')
 cat("...done.\n")
 
 #' 
@@ -28,13 +20,12 @@ cat("...done.\n")
 #' @export
 #'
 
-
 annotate_sv = function(i, bedpe_inp) {
   
   bedpe <- bedpe_inp[i,]
   
   ### Annotate break point A by giving genes that exist where the breakpoint occurs
-  temp_A_gr <- GRanges(paste0("chr",bedpe$CHROM_A[1]), 
+  temp_A_gr <- GRanges(bedpe$CHROM_A[1], 
                          IRanges(bedpe$START_A[1], bedpe$END_A[1]))
   temp_A_gr_ant <-  suppressWarnings(gene_locations %&% temp_A_gr)
   temp_A_dt_ant <- as.data.table(temp_A_gr_ant)
@@ -43,24 +34,24 @@ annotate_sv = function(i, bedpe_inp) {
   if(!nrow(temp_A_dt_ant) == 0) {
     if(nrow(temp_A_dt_ant) == 1) {
         
-      bedpe$BREAK_A_GENE[1] <- temp_A_dt_ant$GENE_NAME[1]
-      bedpe$BREAK_A_GENE_TYPE[1] <- temp_A_dt_ant$GENE_TYPE[1]
+      bedpe$BREAK_A_Ensembl_Gene[1] <- temp_A_dt_ant$EnsemblID[1]
+      bedpe$BREAK_A_Gene_Name[1] <- temp_A_dt_ant$GeneName[1]
         
     } else {
         
-      bedpe$BREAK_A_GENE[1] <- paste0(temp_A_dt_ant$GENE_NAME, collapse = ";")
-      bedpe$BREAK_A_GENE_TYPE[1] <- paste0(temp_A_dt_ant$GENE_TYPE, collapse = ";")
+      bedpe$BREAK_A_Ensembl_Gene[1] <- paste0(temp_A_dt_ant$EnsemblID, collapse = ";")
+      bedpe$BREAK_A_Gene_Name[1] <- paste0(temp_A_dt_ant$GeneName, collapse = ";")
         
     }
   } else {
       
-    bedpe$BREAK_A_GENE[1] <- ""
-    bedpe$BREAK_A_GENE_TYPE[1] <- ""
+    bedpe$BREAK_A_Ensembl_Gene[1] <- ""
+    bedpe$BREAK_A_Gene_Name[1] <- ""
       
   }
     
   ### Annotate break point B
-  temp_B_gr <- GRanges(paste0("chr",bedpe$CHROM_B[1]), 
+  temp_B_gr <- GRanges(bedpe$CHROM_B[1], 
                          IRanges(bedpe$START_B[1], bedpe$END_B[1]))
   temp_B_gr_ant <-  suppressWarnings(gene_locations %&% temp_B_gr)
   temp_B_dt_ant <- as.data.table(temp_B_gr_ant)
@@ -69,22 +60,76 @@ annotate_sv = function(i, bedpe_inp) {
   if(!nrow(temp_B_dt_ant) == 0) {
     if(nrow(temp_B_dt_ant) == 1) {
         
-      bedpe$BREAK_B_GENE[1] <- temp_B_dt_ant$GENE_NAME[1]
-      bedpe$BREAK_B_GENE_TYPE[1] <- temp_B_dt_ant$GENE_TYPE[1]
+      bedpe$BREAK_B_Ensembl_Gene[1] <- temp_B_dt_ant$EnsemblID[1]
+      bedpe$BREAK_B_Gene_Name[1] <- temp_B_dt_ant$GeneName[1]
         
     } else {
         
-      bedpe$BREAK_B_GENE[1] <- paste0(temp_B_dt_ant$GENE_NAME, collapse = ";")
-      bedpe$BREAK_B_GENE_TYPE[1] <- paste0(temp_B_dt_ant$GENE_TYPE, collapse = ";")
+      bedpe$BREAK_B_Ensembl_Gene[1] <- paste0(temp_B_dt_ant$EnsemblID, collapse = ";")
+      bedpe$BREAK_B_Gene_Name[1] <- paste0(temp_B_dt_ant$GeneName, collapse = ";")
         
     }
   } else {
       
-    bedpe$BREAK_B_GENE[1] <- ""
-    bedpe$BREAK_B_GENE_TYPE[1] <- ""
+    bedpe$BREAK_B_Ensembl_Gene[1] <- ""
+    bedpe$BREAK_B_Gene_Name[1] <- ""
       
   }
 return(bedpe)
+}
+
+#' 
+#' Germline filtering
+#' @name fuzzy_filter_germline
+#' 
+#' @param i: passed from lapply to iterate
+#' @param bedpe: Manta Bedpe returned from annotate_sv function
+#' @return SV data table with columns added indicating germline or somatic, germline is defined as <=200bp away from agnostic perfect match in reference
+#' @description Determines if each SV should be considered germline by hard filtering
+#' @export
+#'
+#'
+fuzzy_filter_germline <- function(i, bed) {
+ 
+   sub <- bed[i,]
+  
+  ## reorder for filtering
+  if(sub$CHROM_A > sub$CHROM_B) {
+    sub_ord <- cbind(CHROM_A=sub$CHROM_B, START_A=sub$START_B, END_A=sub$END_B, CHROM_B=sub$CHROM_A, START_B=sub$START_A, END_B=sub$END_A, sub[,7:ncol(bed)])
+  } else if (sub$CHROM_A == sub$CHROM_B & sub$START_A > sub$START_B) {
+    sub_ord <- cbind(CHROM_A=sub$CHROM_B, START_A=sub$START_B, END_A=sub$END_B, CHROM_B=sub$CHROM_A, START_B=sub$START_A, END_B=sub$END_A, sub[,7:ncol(bed)])
+  } else {
+    sub_ord <- sub
+  }
+  
+  ### change to integers to match reference germline
+  sub_ord[CHROM_A == "X", CHROM_A := 23]
+  sub_ord[CHROM_B == "X", CHROM_B := 23]
+  sub_ord[CHROM_A == "Y", CHROM_A := 24]
+  sub_ord[CHROM_B == "Y", CHROM_B := 24]
+  
+  ### subset reference to matching chromosome
+  ref_sub <- hg38_germline_gnomad[chrom1 == sub_ord$CHROM_A & chrom2 == sub_ord$CHROM_B]
+  
+  ### calculate distances
+  ref_sub[,str_dist := abs(start - sub_ord$START_A)]
+  ref_sub[,end_dist := abs(end - sub_ord$START_B)]
+  ref_sub[, tot_dist := (str_dist + end_dist)]
+  
+  ### choose closest match
+  ref_min <- ref_sub[which.min(ref_sub$tot_dist)]
+  
+  if(nrow(ref_min) < 1) {
+    sub$Filter[1] <- "Somatic"
+  
+  } else if (ref_min$tot_dist > 1000) {
+    sub$Filter[1] <-paste0("Somatic","(", ref_min$tot_dist,")")
+    
+  } else {
+    sub$Filter[1] <-paste0("Germline","(", ref_min$tot_dist,")")
+    
+  }
+  return(sub)
 }
 
 #' 
@@ -227,19 +272,19 @@ return(rearrangement)
 }
 
 
-
-
 #### MAIN FUNCTION #####
 
 option_list <- list(
   
   make_option(c("-i", "--input"),  type = "character", default = NULL,  help = "Input bedpe directory path"),
   
-  make_option(c("-r", "--genomeant"),  type = "character", default = NULL,  help = "Path to gencode annotation file"),
+  make_option(c("-r", "--genomeant"),  type = "character", default = NULL,  help = "Path to gene location file"),
   
   make_option(c("-o", "--output"), type = "character", default = NULL, help = "Output directory path"),
   
-  make_option(c("-g","--germline"), type = "character", default = NULL, help = "Germline reference path")
+  make_option(c("-g","--germline"), type = "character", default = NULL, help = "Germline reference path"),
+  
+  make_option(c("-c", "--cores"), type = "integer", default = 1, help = "Number of cores to run on")
   
   ### to be included in V2
   #make_option(c("-c", "--cancergenes"),  type = "character", default = NULL,  help = "Cancer Genes: path to cosmic cancer genes"),
@@ -252,54 +297,47 @@ option_list <- list(
 parseobj = OptionParser(option_list = option_list)
 opt = parse_args(parseobj)
 
-# get reference gene annotations and germline
-hg38_gene_gr_reference = fread(paste0(opt$genomeant))
-hg38_germline_gnomad = fread(paste0(opt$germline))
-
-#### too be included in V2 ####
-#hg38_tad_gr_reference = fread(paste0(opt$tadboundaries))
-#cancer_genes <- fread(paste0(opt$cancergenes))$'Gene Symbol'
-
-if (!file.exists(input_pth)) {
+if (!file.exists(opt$input)) {
   
   stop(sprintf("Input file '%s' does not exist!", input_pth))
   
 } else if (is.null(opt$genomeant) | is.null(opt$output) | is.null(opt$germline)) {
   
-  stop(sprintf("Please include reference files and directory"))
+  stop(sprintf("Please include reference files and output directory"))
   
 } else {
   input_pth = paste0(opt$input)
+  sample <- unlist(strsplit(input_pth, "/"))[length(unlist(strsplit(input_pth, "/")))]
+  sample <- gsub(".vcf.bedpe","", sample)
   out_pth = paste0(opt$output)
   
   cat('Building references... \n')
   
   # get reference gene annotations and germline
   hg38_annotgenes = fread(paste0(opt$genomeant))
+  hg38_germline_gnomad <<- fread(paste0(opt$germline))
   
   ### build granges for reference
-  gene_locations <<- GRanges(hg38_annotgenes$chrom, IRanges(hg38_annotgenes$start_pos, 
-                                                           hg38_annotgenes$end_pos))
-  mcols(gene_locations) <<- hg38_annotgenes[,c(2,4:10)]
-  
-  hg38_germline_gnomad <<- fread(paste0(opt$germline))
+  gene_locations <<- GRanges(hg38_annotgenes$chromosome, IRanges(hg38_annotgenes$start, 
+                                                           hg38_annotgenes$end), EnsemblID = hg38_annotgenes$Ensembl_ID, GeneName = hg38_annotgenes$gene_name)
   
   cat("Reading file...\n")
   bedpe_inp <- fread(paste0(input_pth))
   
   cat("Adding gene annotations...\n")
-  bedpe_gene_annotation <- rbindlist(lapply(1:nrow(bedpe_inp), annotate_sv, bedpe_inp))
+  bedpe_gene_annotation <- rbindlist(mclapply(1:nrow(bedpe_inp), annotate_sv, bedpe_inp, mc.cores = opt$cores))
   
+  cat("Fuzzy filtering germline...\n")
+  bedpe_fuzzy_filtered <- rbindlist(mclapply(1:nrow(bedpe_gene_annotation), fuzzy_filter_germline, bedpe_gene_annotation, mc.cores = opt$cores))
   
-  ##### TO DO #####
-  ### 1. Add fuzzy filter for germline 200bp cutoff
-  ### 2. Write out sv.annotated.bedpe + somatic_only_sv.annotated.bedpe
+  bedpe_somatic_only <- bedpe_fuzzy_filtered[grep("Somatic", Filter)]
+  output_somatic_only <- paste0(out_pth, sample, ".somatic_only_sv.annotated.bedpe")
+  output_all <- paste0(out_pth, sample, ".sv.annotated.bedpe")
   
+  write.table(bedpe_fuzzy_filtered, output_all, sep = '\t', row.names = F, col.names = T, quote = F)
+  write.table(bedpe_somatic_only, output_somatic_only, sep = '\t', row.names = F, col.names = T, quote = F)
+  time_end <- Sys.time()
+  cat(paste0("Began at ", time_begin,"\n"))
+  cat(paste0("Ended at ", time_end,"\n"))
   
-  # for V2
-  #cat("Adding TAD annotations...\n")
-  #bedpe_gene_tad_annotation <- rbindlist(lapply(1:nrow(bedpe_gene_annotation), annotate_tad, bedpe_gene_annotation))
-  
-  #write.table(bedpe_gene_tad_annotation, output_pth, row.names = F, col.names = T, sep = "\t", quote = F)
 }
-  
