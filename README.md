@@ -14,7 +14,7 @@ This code is an R implementation of the svtools vcf2bedpe function which can als
 
 ## Example Usage
 ```bash
-Rscript MANTA_vcf2bedpe.R -i <path to vcf file> -o <output directory path>
+Rscript MANTA_vcf2bedpe.R -i <path to vcf file> -o <output_directory_path/>
 ```
 
 
