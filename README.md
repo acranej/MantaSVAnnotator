@@ -31,7 +31,7 @@ use `hg38_ensembl_genelocations_formatted.txt` as the gene annotation file
 ## Example usage
 
 ```bash
-Rscript Manta_SV_Annotator_2.R -i <input file path> -o <output directory path> -r <gene annotation file path> -g <germline reference file path>
+Rscript Manta_SV_Annotator_2.R -i <input file path> -o <output directory path> -r <gene annotation file path> -g <germline reference file path> -c <cores>
 ```
 
 ## Reference files 
