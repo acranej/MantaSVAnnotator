@@ -45,3 +45,10 @@ Rscript Manta_SV_Annotator_2.R
 Ensembl gene locations were downloaded from biomart. Formatting restricted the table to gene boundaries, chromosome, and gene ID to reduce file size. 
 
 Gnomad germline SV reference files were downloaded from the gnomad project public database (controls only). They were then restricted to those that 'PASSED' gnomad's filtering process. The rtracklayer implimentation of liftOver was used to translate the hg19 positions to hg38. Insertions had endpoints adjusted to reflect the size of the insertion in relation to the reference genome.
+
+## File pipeline
+```bash
+FILE_NAME.somaticSV.vcf --> [MANTA_vcf2bedpe.R] --> FILE_NAME.somaticSV.vcf.bedpe + FILE_NAME.somaticSV.vcf_removed_calls
+FILE_NAME.somaticSV.vcf.bedpe --> [Manta_SV_Annotator_2.R] --> FILE_NAME.somaticSV.somatic_only_sv.annotated.bedpe + FILE_NAME.somaticSV.sv.annotated.bedpe
+```
+
