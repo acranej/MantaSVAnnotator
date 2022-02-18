@@ -126,10 +126,10 @@ fuzzy_filter_germline <- function(i, bed) {
     sub$Filter[1] <- "Germline"
   }
   else if (ref_min$tot_dist > 1000) {
-    sub$Filter[1] <-paste0("Somatic","(", ref_min$tot_dist,")")
+    sub$Filter[1] <-paste0("Somatic")
     
   } else {
-    sub$Filter[1] <-paste0("Germline","(", ref_min$tot_dist,")")
+    sub$Filter[1] <-paste0("Germline")
     
   }
   return(sub)
@@ -332,12 +332,13 @@ if (!file.exists(opt$input)) {
   
   cat("Fuzzy filtering germline...\n")
   bedpe_fuzzy_filtered <- rbindlist(mclapply(1:nrow(bedpe_gene_annotation), fuzzy_filter_germline, bedpe_gene_annotation, mc.cores = opt$cores))
-  
-  bedpe_somatic_only <- bedpe_fuzzy_filtered[grep("Somatic", Filter)]
+  bedpe_fuzzy_filtered_sub <- bedpe_fuzzy_filtered[,uuid:=NULL]
+  bedpe_somatic_only <- bedpe_fuzzy_filtered_sub[grep("Somatic", Filter)]
+  bedpe_somatic_only[,Filter := NULL]
   output_somatic_only <- paste0(out_pth, sample, ".somatic_only_sv.annotated.bedpe")
   output_all <- paste0(out_pth, sample, ".sv.annotated.bedpe")
   
-  write.table(bedpe_fuzzy_filtered, output_all, sep = '\t', row.names = F, col.names = T, quote = F)
+  write.table(bedpe_fuzzy_filtered_sub, output_all, sep = '\t', row.names = F, col.names = T, quote = F)
   write.table(bedpe_somatic_only, output_somatic_only, sep = '\t', row.names = F, col.names = T, quote = F)
   time_end <- Sys.time()
   cat(paste0("Began at ", time_begin,"\n"))
