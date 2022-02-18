@@ -14,7 +14,7 @@ This code is an R implementation of the svtools vcf2bedpe function which can als
 
 ## Example Usage
 ```bash
-Rscript MANTA_vcf2bedpe.R -i <path to vcf file> -o <output_directory_path/>
+Rscript MANTA_vcf2bedpe.R -i <Required:path to vcf file> -o <Required:output_directory_path>
 ```
 
 
@@ -35,7 +35,7 @@ use `gnomad_germline_hg38all.txt` as the germline annotation file
 ```bash
 Rscript Manta_SV_Annotator_2.R 
 -i <Required:input input_filepath> 
--o <Required:output directory_path/> 
+-o <Required:output directory_path> 
 -r <Required:gene annotation_filepath> 
 -g <Required:germline reference_filepath> 
 -c <Optional:cores (default = 1)>
