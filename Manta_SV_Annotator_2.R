@@ -14,7 +14,7 @@ cat("...done.\n")
 #' @name annotate_sv
 #' 
 #' @param i: passed from lapply to iterate
-#' @param bedpe_inp: Manta Bedpe returned from SVtools
+#' @param bedpe_inp: Manta Bedpe returned from SVtools or MANTA_vcf2bedpe
 #' @return SV data table with columns added indicating if the SV affects a gene, the name of the gene, and the type of the gene
 #' @description Determines if each breakend of a SV occurs within a gene's boundaries
 #' @export
@@ -119,10 +119,13 @@ fuzzy_filter_germline <- function(i, bed) {
   ### choose closest match
   ref_min <- ref_sub[which.min(ref_sub$tot_dist)]
   
-  if(nrow(ref_min) < 1) {
+  if (nrow(ref_min) < 1) {
     sub$Filter[1] <- "Somatic"
   
-  } else if (ref_min$tot_dist > 1000) {
+  } else if (ref_min$tot_dist > 1000 & sub$SPAN > 0 & sub$SPAN < 1000) {
+    sub$Filter[1] <- "Germline"
+  }
+  else if (ref_min$tot_dist > 1000) {
     sub$Filter[1] <-paste0("Somatic","(", ref_min$tot_dist,")")
     
   } else {
