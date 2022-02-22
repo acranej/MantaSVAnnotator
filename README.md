@@ -28,6 +28,8 @@ use `Manta_SV_Annotator_2` (REQUIRED inputs are input fiile path, output directo
 
 use `hg38_ensembl_genelocations_formatted.txt` as the gene annotation file
 
+use `hg38_ensembl_exonlocations_formatted.txt.zip` as the exon annotation file (needs to be unzipped first)
+
 use `gnomad_germline_hg38all.txt` as the germline annotation file
 
 ## Example usage
@@ -37,12 +39,13 @@ Rscript Manta_SV_Annotator_2.R
 -i <Required:input input_filepath> 
 -o <Required:output directory_path> 
 -r <Required:gene annotation_filepath> 
+-e <Required:exon annotation_filepath>
 -g <Required:germline reference_filepath> 
 -c <Optional:cores (default = 1)>
 ```
 
 ## Reference files 
-Ensembl gene locations were downloaded from biomart(http://nov2020.archive.ensembl.org/biomart). Formatting restricted the table to gene boundaries, chromosome, and gene ID to reduce file size. 
+Ensembl gene and exon locations were downloaded from biomart(http://nov2020.archive.ensembl.org/biomart). Formatting restricted the table to gene boundaries, chromosome, and gene ID to reduce file size. 
 
 Gnomad germline SV reference files were downloaded from the gnomad project public database (https://gnomad.broadinstitute.org/downloads SV 2.1 (controls) sites BED). They were then restricted to those that 'PASSED' gnomad's filtering process. The rtracklayer implimentation of liftOver was used to translate the hg19 positions to hg38. Insertions had endpoints adjusted to reflect the size of the insertion in relation to the reference genome.
 
