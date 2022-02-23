@@ -274,7 +274,7 @@ opt = parse_args(parseobj)
 
 if (!file.exists(opt$input)) {
   
-  stop(sprintf("Input file '%s' does not exist!", input_pth))
+  stop(sprintf("Input file '%s' does not exist! ", opt$input))
   
 } else if (is.null(opt$genomeant) | is.null(opt$output) | is.null(opt$germline) | is.null(opt$exonannot)) {
   
