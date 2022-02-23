@@ -65,7 +65,7 @@ return(bedpe)
 #' @name annotate_exon
 #' 
 #' @param i: passed from lapply to iterate
-#' @param bedpe_inp: Manta Bedpe returned from SVtools or MANTA_vcf2bedpe
+#' @param bedpe_input: Manta Bedpe returned from SVtools or MANTA_vcf2bedpe
 #' @return SV data table with columns added indicating if the SV breakend occurs in an exon
 #' @description Determines if each breakend of a SV occurs within a exon's boundaries
 #' @export
