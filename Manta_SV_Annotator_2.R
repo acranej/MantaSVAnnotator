@@ -283,7 +283,7 @@ if (!file.exists(opt$input)) {
 } else {
   input_pth = paste0(opt$input)
   sample <- unlist(strsplit(input_pth, "/"))[length(unlist(strsplit(input_pth, "/")))]
-  sample <- gsub(".vcf.bedpe","", sample)
+  #sample <- gsub(".vcf.bedpe","", sample)
   out_pth = paste0(opt$output)
   
   cat('Building references... \n')
@@ -315,8 +315,8 @@ if (!file.exists(opt$input)) {
   bedpe_fuzzy_filtered_sub <- bedpe_fuzzy_filtered[,uuid:=NULL]
   bedpe_somatic_only <- bedpe_fuzzy_filtered_sub[grep("Somatic", Filter)]
   bedpe_somatic_only[,Filter := NULL]
-  output_somatic_only <- paste0(out_pth, sample, ".somatic_only_sv.annotated.bedpe")
-  output_all <- paste0(out_pth, sample, ".sv.annotated.bedpe")
+  output_somatic_only <- paste0(out_pth, sample, "_somatic_only_sv_annotated.bedpe")
+  output_all <- paste0(out_pth, sample, "_sv_annotated.bedpe")
   
   write.table(bedpe_fuzzy_filtered_sub, output_all, sep = '\t', row.names = F, col.names = T, quote = F)
   write.table(bedpe_somatic_only, output_somatic_only, sep = '\t', row.names = F, col.names = T, quote = F)
