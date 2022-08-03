@@ -45,11 +45,11 @@ bnd_matching <- function(id) {
       bed_temp <- cbind(bed_temp, which_mate_A$ID, which_mate_A$QUAL, strandA,strandB, which_mate_A$TYPE,
                         which_mate_A$FILTER, which_mate_A$ID, which_mate_A$REF, 
                         which_mate_A$ALT, which_mate_B$ID, which_mate_B$REF, which_mate_B$ALT,
-                        which_mate_A$INFO, which_mate_B$INFO, which_mate_A$FORMAT, which_mate_A$OCILY12, which_mate_A$SPAN) #### need to use the alt seq to adjust start positons of these (nchar(gsub[A-Z]))
+                        which_mate_A$INFO, which_mate_B$INFO, which_mate_A$FORMAT, which_mate_A$SAMPLE, which_mate_A$SPAN) #### need to use the alt seq to adjust start positons of these (nchar(gsub[A-Z]))
       
       colnames(bed_temp)[7:23] <- c("ID", "QUAL", "STRAND_A","STRAND_B","TYPE",
                                     "FILTER","NAME_A","REF_A", "ALT_A","NAME_B","REF_B",
-                                    "ALT_B","INFO_A","INFO_B", "FORMAT", "OCILY12","SPAN")
+                                    "ALT_B","INFO_A","INFO_B", "FORMAT", "SAMPLE","SPAN")
       
       bed_temp <- cbind(bed_temp, which_mate_A$HOMSEQ, which_mate_A$HOMLEN)
       colnames(bed_temp)[24:25] <- c("HOMSEQ", "HOMLEN")
@@ -82,7 +82,7 @@ vcf_to_bedpe <- function(path) {
   if (ncol(vcf.input)==10) {
     setnames(vcf.input, paste0("V",seq(1:10)), c("seqnames","start","ID","REF",
                                                  "ALT","QUAL","FILTER","INFO",
-                                                 "FORMAT","OCILY12"))
+                                                 "FORMAT","SAMPLE"))
   }
   
   if ("INFO" %in% colnames(vcf.input)) {
@@ -169,7 +169,7 @@ vcf_to_bedpe <- function(path) {
     non_bnd_save <- non_bnd[,c("CHROM_A","START_A","END_A","CHROM_B","START_B",
                                "END_B", "ID", "QUAL", "STRAND_A","STRAND_B","TYPE",
                                "FILTER","NAME_A","REF_A", "ALT_A","NAME_B","REF_B",
-                               "ALT_B","INFO_A","INFO_B", "FORMAT", "OCILY12","SPAN",
+                               "ALT_B","INFO_A","INFO_B", "FORMAT", "SAMPLE","SPAN",
                                "HOMSEQ", "HOMLEN","uuid")]
     
     
